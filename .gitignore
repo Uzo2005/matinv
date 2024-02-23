@@ -1,0 +1,7 @@
+.env
+server
+public/
+client.js
+index.html
+styles.css
+server.nim
