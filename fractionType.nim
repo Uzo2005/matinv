@@ -2,7 +2,7 @@ import math
 
 type Fraction = tuple
     numerator: int
-    denominator: range[1..int.high]
+    denominator: int
 
 proc initFrac(numerator = 0, denominator = 1):  Fraction =
     result.numerator = numerator
@@ -33,9 +33,22 @@ proc `$`(a: Fraction): string =
         result = $a.numerator & "/" & $a.denominator
 
 proc toProperFraction(a: Fraction): Fraction =
+    #This doesnt actually make it a "Proper Fraction", it just reduces both numerator and denominator into the lowest values while still retaining the scale. E.g `2/4` is converted to `1/2`
+    #Also this cures the fraction of any `div by zero` madness
+
     let gcd = gcd(a.numerator, a.denominator)
 
-    result = initFrac(a.numerator div gcd, a.denominator div gcd)
+    if (a.denominator < 0):
+        let 
+            nonNegativeDenominator = a.denominator * -1
+            newNumerator = a.numerator * -1
+        return initFrac(newNumerator div gcd, nonNegativeDenominator div gcd)
+    else:
+        if a.denominator == 0:
+            return zeroFraction
+        else:
+            return initFrac(a.numerator div gcd, a.denominator div gcd)
+
 
 proc `*` (a, b: Fraction): Fraction =
     defer: result = result.toProperFraction
@@ -75,6 +88,9 @@ proc `/`(a: Fraction, b: int):Fraction =
 
     result = a * b.toFraction.multiplicativeInverse
 
+# template `div` (a, b: Fraction): Fraction = a / b
+# template `div` (a, b: int): Fraction = a / b
+
 template `-`(a, b: Fraction): Fraction =
     a + (-1 * b)
 
@@ -86,3 +102,12 @@ template `-`(a: int, b: Fraction): Fraction =
 
 template `+=`(a, b: Fraction) = a = a + b
 template `*=`(a, b: Fraction) = a = a * b
+
+
+proc lcm(a, b: Fraction): Fraction = 
+    if a == b:
+        return a
+    else:
+        let product = a * b
+        let lcm = lcm(product.numerator, product.denominator)
+        return lcm.toFraction

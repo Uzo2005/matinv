@@ -5,6 +5,7 @@ We are currently doing linear algebra as a course and so I do lot of boring-ass 
     1. Determinants Of Matrices
     2. Adjoint(Adjucate?) Of Matrices
     3. Inverse Of Matrices (will throw exception for singular matrices)
+    4. Normal and Reduced Echelon Forms of Matrix, and hence verification of consistency for a linear system of equations
 
 #### I hope to also implement:
 
