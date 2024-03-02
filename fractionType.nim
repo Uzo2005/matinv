@@ -108,6 +108,7 @@ proc lcm(a, b: Fraction): Fraction =
     if a == b:
         return a
     else:
-        let product = a * b
-        let lcm = lcm(product.numerator, product.denominator)
-        return lcm.toFraction
+        let 
+            lcmNumerator = lcm(a.numerator, b.numerator)
+            lcmDenominator = lcm(a.denominator, b.denominator)
+        result = toProperFraction(initFrac(lcmNumerator, lcmDenominator))

@@ -13,3 +13,6 @@ We are currently doing linear algebra as a course and so I do lot of boring-ass 
     2. Diagonilization of Matrices
 
 Also if I have time, I will make this a website so other people can use it.
+
+
+Wow, I set out to get lazier by spending less time on schoolwork but instead this tool just made me love school more. I love it!
