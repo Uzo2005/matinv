@@ -1,4 +1,4 @@
-import sequtils, strutils, algorithm
+import sequtils, strutils, algorithm, strformat
 include fractionType
 #TODOs
 #implement cramer's rule
@@ -12,9 +12,6 @@ type
         cols: int
         data: seq[Fraction]
     
-    Answer[T] = object
-        solution: T
-        explanation: string
 
 
 type InverseOfSingularMatrix = object of ValueError
@@ -30,19 +27,19 @@ proc `[]=`(mat: var Matrix, row, col: int, val: Fraction) =
     assert col < mat.cols, " Out of range value for row provided"
     mat.data[(mat.cols * row) + col] = val
 
-proc `$`(mat: Matrix): string =
-    result.add("[\n    ")
+proc `$`(mat: Matrix, tabIndents = 0): string =
+    let indent = '\t'.repeat(tabIndents)
+    # result.add(indent & "[\n")
 
     for row in 0..<mat.rows:
-        result.add("[")
+        result.add(indent & "  [")
         for col in 0..<mat.cols:
-            result.add(" " & $mat[row, col] & ",") 
+            result.add(" " & $mat[row, col] & " ") 
         result.add("]\n")
 
-        if row != mat.rows - 1:
-            result.add("    ")
-        
-    result.add("]\n")
+    # result.add(indent & "]\n")
+
+
 
 proc initMat(rows, cols: int): Matrix =
     result.rows = rows
@@ -73,7 +70,6 @@ proc withData(mat: Matrix, data: openArray[Fraction]): Matrix =
     result.cols = mat.cols
     result.data = data.toseq
 
-
 proc `*`(a, b: Matrix): Matrix {.raises: IncompatibleDimensionsForMatrix.} =
     if a.cols != b.rows:
         raise newException(IncompatibleDimensionsForMatrix, "Matrix multiplication between A and B only works if A.cols == B.rows") 
@@ -102,7 +98,7 @@ proc cofactor(mat: Matrix, row, col: int): Matrix =
                 continue
             result.data[currentIndex] = mat[rowIndex, colIndex]
             inc currentIndex
-
+    
 proc transposed(mat: Matrix): Matrix =
     #This will return the transpose of a given matrix
 
@@ -112,14 +108,14 @@ proc transposed(mat: Matrix): Matrix =
         for col in 0..<mat.cols:
             result[col, row] = mat[row, col]
 
-proc determinant(mat: Matrix): Fraction {.raises: IncompatibleDimensionsForMatrix.} =
+proc determinant(mat: Matrix): Fraction {.raises: [IncompatibleDimensionsForMatrix].} =
     #gives us the determinant of a given m x m Matrix
 
     if mat.rows != mat.cols:
         raise newException(IncompatibleDimensionsForMatrix, "Determinants only exist for square matrices")
 
     if mat.shape == (2, 2):
-        return (mat[0, 0] * mat[1, 1]) - (mat[0, 1] * mat[1, 0])
+       return (mat[0, 0] * mat[1, 1]) - (mat[0, 1] * mat[1, 0])
     
     result = initFrac()
     var currentMultiplier = initFrac(1)
@@ -129,7 +125,7 @@ proc determinant(mat: Matrix): Fraction {.raises: IncompatibleDimensionsForMatri
         result += currentMultiplier * mat[0, col] * cofactorDet
         currentMultiplier *= -1
     
-proc adjoint(mat: Matrix): Matrix {.raises: IncompatibleDimensionsForMatrix.} =
+proc adjoint(mat: Matrix): Matrix {.raises: [IncompatibleDimensionsForMatrix].} =
     #This will compute the adjoint of a given m x m matrix. By definition, the `adj(A) * A = xI` where x is a scalar
 
     #this does not check if this matrix even has a reasonable adjoint. 

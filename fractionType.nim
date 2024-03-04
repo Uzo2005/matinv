@@ -1,4 +1,5 @@
 import math
+#TODO make this file its own library
 
 type Fraction = tuple
     numerator: int
@@ -112,3 +113,4 @@ proc lcm(a, b: Fraction): Fraction =
             lcmNumerator = lcm(a.numerator, b.numerator)
             lcmDenominator = lcm(a.denominator, b.denominator)
         result = toProperFraction(initFrac(lcmNumerator, lcmDenominator))
+
