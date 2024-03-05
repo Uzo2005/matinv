@@ -1,39 +1,39 @@
 import math
 #TODO make this file its own library
 
-type Fraction = tuple
+type Fraction* = tuple
     numerator: int
     denominator: int
 
-proc initFrac(numerator = 0, denominator = 1):  Fraction =
+proc initFrac*(numerator = 0, denominator = 1):  Fraction =
     result.numerator = numerator
     result.denominator = denominator
 
-converter toFloat(a: Fraction): float = a.numerator / a.denominator
+converter toFloat*(a: Fraction): float = a.numerator / a.denominator
 
-converter toFraction(a: int): Fraction = initFrac(numerator = a)
+converter toFraction*(a: int): Fraction = initFrac(numerator = a)
 
-template zeroFraction(): Fraction = initFrac()
+template zeroFraction*(): Fraction = initFrac()
 
-proc multiplicativeInverse(a: Fraction): Fraction =
+proc multiplicativeInverse*(a: Fraction): Fraction =
     if a.numerator == 0:
         result = zeroFraction
     else:
         result = initFrac(a.denominator, a.numerator)
 
-proc additiveInverse(a: Fraction): Fraction =
+proc additiveInverse*(a: Fraction): Fraction =
     if a.numerator == 0:
         result = zeroFraction
     else:
         result = initFrac(a.numerator * -1, a.denominator)
 
-proc `$`(a: Fraction): string =
+proc `$`*(a: Fraction): string =
     if a.denominator == 1: 
         result = $a.numerator #reduce noise
     else:
         result = $a.numerator & "/" & $a.denominator
 
-proc toProperFraction(a: Fraction): Fraction =
+proc toProperFraction*(a: Fraction): Fraction =
     #This doesnt actually make it a "Proper Fraction", it just reduces both numerator and denominator into the lowest values while still retaining the scale. E.g `2/4` is converted to `1/2`
     #Also this cures the fraction of any `div by zero` madness
 
@@ -51,7 +51,7 @@ proc toProperFraction(a: Fraction): Fraction =
             return initFrac(a.numerator div gcd, a.denominator div gcd)
 
 
-proc `*` (a, b: Fraction): Fraction =
+proc `*`*(a, b: Fraction): Fraction =
     defer: result = result.toProperFraction
 
     if (a == zeroFraction) or (b == zeroFraction):
@@ -60,12 +60,12 @@ proc `*` (a, b: Fraction): Fraction =
         result.numerator = a.numerator * b.numerator
         result.denominator = a.denominator * b.denominator
 
-proc `*`(a: int, b: Fraction): Fraction =
+proc `*`*(a: int, b: Fraction): Fraction =
     defer: result = result.toProperFraction
 
     result = a.toFraction * b
 
-proc `+` (a, b: Fraction): Fraction = 
+proc `+`* (a, b: Fraction): Fraction = 
     defer: result = result.toProperFraction
 
     if (a == additiveInverse(b)):
@@ -74,17 +74,17 @@ proc `+` (a, b: Fraction): Fraction =
         result.numerator = (a.numerator*b.denominator) + (b.numerator * a.denominator)
         result.denominator = a.denominator * b.denominator
 
-proc `/`(a, b: Fraction): Fraction =
+proc `/`*(a, b: Fraction): Fraction =
     defer: result = result.toProperFraction
 
     result = a * b.multiplicativeInverse
 
-proc `/`(a: int, b: Fraction): Fraction =
+proc `/`*(a: int, b: Fraction): Fraction =
     defer: result = result.toProperFraction
 
     result = a * b.multiplicativeInverse
 
-proc `/`(a: Fraction, b: int):Fraction =
+proc `/`*(a: Fraction, b: int):Fraction =
     defer: result = result.toProperFraction
 
     result = a * b.toFraction.multiplicativeInverse
@@ -92,20 +92,20 @@ proc `/`(a: Fraction, b: int):Fraction =
 # template `div` (a, b: Fraction): Fraction = a / b
 # template `div` (a, b: int): Fraction = a / b
 
-template `-`(a, b: Fraction): Fraction =
+template `-`*(a, b: Fraction): Fraction =
     a + (-1 * b)
 
-template `-`(a: Fraction, b: int): Fraction =
+template `-`*(a: Fraction, b: int): Fraction =
     a + (-1 * b.toFraction)
 
-template `-`(a: int, b: Fraction): Fraction =
+template `-`*(a: int, b: Fraction): Fraction =
     a.toFraction + (-1 * b)
 
-template `+=`(a, b: Fraction) = a = a + b
-template `*=`(a, b: Fraction) = a = a * b
+template `+=`*(a, b: Fraction) = a = a + b
+template `*=`*(a, b: Fraction) = a = a * b
 
 
-proc lcm(a, b: Fraction): Fraction = 
+proc lcm*(a, b: Fraction): Fraction = 
     if a == b:
         return a
     else:
@@ -114,3 +114,4 @@ proc lcm(a, b: Fraction): Fraction =
             lcmDenominator = lcm(a.denominator, b.denominator)
         result = toProperFraction(initFrac(lcmNumerator, lcmDenominator))
 
+export math

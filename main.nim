@@ -1,7 +1,6 @@
 import sequtils, strutils, algorithm
-include fractionType
+import fractionType, polynomialType
 #TODOs
-#implement cramer's rule
 #implement eigen vectors and values
 #orthogonal matrices
 #diagonalisation of matrices
@@ -14,6 +13,10 @@ type
 
     RowOperations = object
         intermediateStates: seq[Matrix]
+
+    EigenPairs = object
+        eigenValue: Fraction
+        eigenVector: Matrix
 
 type InverseOfSingularMatrix = object of ValueError
 type IncompatibleDimensionsForMatrix = object of ValueError
@@ -526,6 +529,20 @@ proc LU(mat: Matrix): tuple[L: Matrix, U: Matrix] =
 
     result.L = L
     result.U = rowEchelonForm
+
+proc characteristicEquation(mat: Matrix): PolynomialEquation =
+    discard
+
+proc useBackPropagationToObtainApproximateSolution(equation: PolynomialEquation): seq[Fraction] =
+    discard
+
+proc eigenPairs(mat: Matrix): seq[EigenPairs] =
+    #This computes the eigenvalues and corresponding eigenvectors of matrix `mat` and returns all the eigenPairs as members of a sequence
+    # If Ax = kx where k is a scalar called the eigenValue and x is a columnVector called the eigenVector, then (A - kI)x = 0. 
+    # The characteristic equation of this matrix can be obtained by row reductions on the augmented matrix [(A - kI) 0]
+    # If I can obtain the characteristic equation, I can obtain the approximate answers by backpropagation
+    discard
+
 
 
 when isMainModule:
