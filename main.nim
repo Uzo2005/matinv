@@ -388,6 +388,8 @@ proc pivotColumn(row: openArray[Fraction]): int =
     for col in 0..<row.len:
         if row[col] != zeroFraction:
             return col
+    
+    return -1
 
 proc isInvertible(mat: Matrix): bool =
     #This checks if the given matrix is invertible
@@ -407,6 +409,9 @@ proc solveUsingRowReduction(augmentedMatrix: Matrix): string =
         allAlphabets = {'a'..'z'}.toseq
         neededVariables = allAlphabets[0..reducedRowEchelonForm.intermediateStates[^1].cols - 1]
 
+    echo augmentedMatrix
+    echo reducedRowEchelonForm
+    echo reducedRowEchelonForm.showSteps
     var basicVariables: seq[char]
 
     result.add("Solving for the values of " & join(neededVariables[0 .. ^2], ", ") & " and " & $neededVariables[^1] & " gives: \n")
@@ -416,7 +421,10 @@ proc solveUsingRowReduction(augmentedMatrix: Matrix): string =
         let 
             rowData = reducedRowEchelonForm.intermediateStates[^1].getRow(rowIndex)
 
-        basicVariables.add(neededVariables[rowData.pivotColumn])
+        let pivotColumn = rowData.pivotColumn
+
+        if pivotColumn != -1:
+            basicVariables.add(neededVariables[rowData.pivotColumn])
 
         for column in 0..rowData.len - 2:
             if rowData[column] == zeroFraction:
@@ -429,6 +437,9 @@ proc solveUsingRowReduction(augmentedMatrix: Matrix): string =
             
             result.add(coefficient & neededVariables[currentVariable])
             inc currentVariable
+
+        if rowData.sum == zeroFraction:
+            result.add("0")
         
         result.add(" = " & $rowData[^1] & "\n")
     
@@ -543,46 +554,95 @@ proc eigenPairs(mat: Matrix): seq[EigenPairs] =
     # If I can obtain the characteristic equation, I can obtain the approximate answers by backpropagation
     discard
 
-
-
 when isMainModule:
-    template generateData(row, cols: int): seq[int] = (1..row*cols).toseq
-    
-    # var mat2 = initMat(3, 3).withData([initFrac(13, 8), initFrac(-12, 8), initFrac(-1, 8), initFrac(-15, 8), initFrac(12, 8), initFrac(3, 8), initFrac(5, 4), zeroFraction, initFrac(-1, 4)])
-    # var mat1 = initMat(3, 4).withData([0, 1, -4, 8, 2, -3, 2, 1, 5, -8, 7, 1])
-    # var mat1 = initMat(3, 4).withData([1, -2, 1, 0, 0, 2, -8, 8, -4, 5, 9, -9])
-    var mat1 = initMat(3, 3).withData([1, 1, 1, 0, 2, 3, 5, 5, 1])
-    # var mat1 = initMat(4, 4).withData([3, 6, 4, 2, 8, 5, 3, 1, 7, 2, 3, 7, 8, 3, 2, 5])
-    # var mat1 = initMat(3, 6).withData([0, 3, -6, 6, 4, -5, 3, -7, 8, -5, 8, 9, 3, -9, 12, -9, 6, 15])
-    # var mat1 = initMat(3, 6).withData([3, -9, 12, -9, 6, 15, 0, 2, -4, 4, 2, -6, 0, 0, 0, 0, 1, 4])
-    # var mat1 = initMat(3, 6).withData([0, 3, -6, 6, 4, -5, 3, -7, 8, -5, 8, 9, 3, -9, 12, -9, 6, 15])
-    # var mat1 = initMat(3, 6).withData([1, 6, 2, -5, -2, -4, 0, 0, 2, -8, -1, 3, 0, 0, 0, 0, 1, 7])
-    # var mat1 = initMat(3, 3).withData([1, 0, 0, 0, 1, 0, -4, 0, 1])
-    # var mat1 = initMat(3, 3).withData([0, 1, 2, 1, 0, 3, 4, -3, 8])
-    # var mat1 = initMat(5, 4).withData([2, -4, -2, 3, 6, -9, -5, 8, 2, -7, -3, 9, 4, -2, -2, -1, -6, 3, 3, 4])
-    # var mat1 = initMat(4, 5).withData([2, 4, -1, 5, -2, -4, -5, 3, -8, 1, 2, -5, -4, 1, 8, -6, 0, 7, -3, 1])
-    # var mat2 = initMat(5, 4).withData([2, -4, -2, 3, 6, -9, -5, 8, 2, -7, -3, 9, 4, -2, -2, -1, -6, 3, 3, 4])
-    try: 
-        # echo mat1.rowEchelonForm.showSteps
-        # echo mat1.determinant
-        # echo mat1.inverse
-        # echo mat1.determinant
-        echo mat1.inverseFromRowOperations.rowOperations.showSteps
-        # echo mat1.inverse
-        # echo mat1.reducedRowEchelonForm
-        # echo mat1.solveUsingRowReduction
-        # echo mat1.inverse
-        # echo mat1.inverse * mat1
-        # echo mat1.solutionExists
-        # mat1.swapRows(1, 2)
-        # echo mat1
+    let 
+        # mat1ASteps = initMat(3, 3).withData([1, 1, 1, 0, 2, 3, 5, 5, 1]).inverseFromRowOperations.rowOperations.showSteps
+        # mat2Steps = initMat(4, 5).withData([1, 2, 2, -1, 5, 2, -1, -1, 4, 6, -1, 3, 4, -2, 5, 3, 1, 1, -4, 4]).reducedRowEchelonForm.showSteps
+        # mat2Solution = initMat(4, 5).withData([1, 2, 2, -1, 5, 2, -1, -1, 4, 6, -1, 3, 4, -2, 5, 3, 1, 1, -4, 4]).solveUsingRowReduction
+        # mat3Steps = initMat(4, 4).withData([1, -2, 2, 3, 2, -1, 6, 6, -2, 1, -4, -3, 1, -1, 4, 6]).inverseFromRowOperations.rowOperations.showSteps
+        # mat3AInverse = initMat(4, 4).withData([1, -2, 2, 3, 2, -1, 6, 6, -2, 1, -4, -3, 1, -1, 4, 6]).inverse
+        # mat3Y = initMat(4, 1).withData([-7, -2, 0, 9])
+        # mat3Solution = mat3AInverse * mat3Y
+        # mat5ISolution = initMat(2, 2).withData([3, 2, 1, -1]).inverse
+        # mat5IISolution = mat5ISolution * initMat(2, 1).withData([2, 3])
+        # mat5IIISolution = initMat(2, 2).withData([3, 2, 1, -1]) * initMat(2, 1).withData([5, 1])
+        # mat9IBSolution = initMat(3, 3).withData([1, 1, 2, 3, -2, 1, 0, -1, 1]).determinant
+        # mat9IIBSolution = initMat(3, 3).withData([1, 1, 2, 3, -2, 1, 0, -1, -1]).determinant
+        # mat12ISteps = initMat(2, 2).withData([1, 3, 2, 8]).inverseFromRowOperations.rowOperations.showSteps
+        # mat12IISteps = initMat(3, 3).withData([2, -1, 3, 1, 0, 2, 3, 1, 4]).inverseFromRowOperations.rowOperations.showSteps
+        # mat14ISteps = initMat(3, 4).withData([-5, 6, 3, 0, 1, 6, 9, 0, 8, -6, 0, 0]).reducedRowEchelonForm.showSteps
+        mat14ISolution = initMat(3, 4).withData([-5, 6, 3, 0, 1, 6, 9, 0, 8, -6, 0, 0]).solveUsingRowReduction
 
-        # let
-        #     g = initFrac(3, 5)
-        #     h = initFrac(1, 2)
-
-        # echo lcm(g, h)
-
-    except InverseOfSingularMatrix as e:
+    try:
+        # echo mat1ASteps
+        # echo mat2Steps
+        # echo mat2Solution
+        # echo mat3Steps
+        # echo mat3Solution
+        # echo mat5ISolution
+        # echo mat5IISolution
+        # echo mat5IIISolution
+        # echo mat9IBSolution
+        # echo mat9IIBSolution
+        # echo mat12ISteps
+        # echo mat12IISteps
+        # echo mat14ISteps
+        echo mat14ISolution
+        
+    except Exception as e:
         echo e.msg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# when isMainModule:
+#     template generateData(row, cols: int): seq[int] = (1..row*cols).toseq
+    
+#     # var mat2 = initMat(3, 3).withData([initFrac(13, 8), initFrac(-12, 8), initFrac(-1, 8), initFrac(-15, 8), initFrac(12, 8), initFrac(3, 8), initFrac(5, 4), zeroFraction, initFrac(-1, 4)])
+#     # var mat1 = initMat(3, 4).withData([0, 1, -4, 8, 2, -3, 2, 1, 5, -8, 7, 1])
+#     # var mat1 = initMat(3, 4).withData([1, -2, 1, 0, 0, 2, -8, 8, -4, 5, 9, -9])
+#     var mat1 = initMat(3, 3).withData([1, 1, 1, 0, 2, 3, 5, 5, 1])
+#     # var mat1 = initMat(4, 4).withData([3, 6, 4, 2, 8, 5, 3, 1, 7, 2, 3, 7, 8, 3, 2, 5])
+#     # var mat1 = initMat(3, 6).withData([0, 3, -6, 6, 4, -5, 3, -7, 8, -5, 8, 9, 3, -9, 12, -9, 6, 15])
+#     # var mat1 = initMat(3, 6).withData([3, -9, 12, -9, 6, 15, 0, 2, -4, 4, 2, -6, 0, 0, 0, 0, 1, 4])
+#     # var mat1 = initMat(3, 6).withData([0, 3, -6, 6, 4, -5, 3, -7, 8, -5, 8, 9, 3, -9, 12, -9, 6, 15])
+#     # var mat1 = initMat(3, 6).withData([1, 6, 2, -5, -2, -4, 0, 0, 2, -8, -1, 3, 0, 0, 0, 0, 1, 7])
+#     # var mat1 = initMat(3, 3).withData([1, 0, 0, 0, 1, 0, -4, 0, 1])
+#     # var mat1 = initMat(3, 3).withData([0, 1, 2, 1, 0, 3, 4, -3, 8])
+#     # var mat1 = initMat(5, 4).withData([2, -4, -2, 3, 6, -9, -5, 8, 2, -7, -3, 9, 4, -2, -2, -1, -6, 3, 3, 4])
+#     # var mat1 = initMat(4, 5).withData([2, 4, -1, 5, -2, -4, -5, 3, -8, 1, 2, -5, -4, 1, 8, -6, 0, 7, -3, 1])
+#     # var mat2 = initMat(5, 4).withData([2, -4, -2, 3, 6, -9, -5, 8, 2, -7, -3, 9, 4, -2, -2, -1, -6, 3, 3, 4])
+#     try: 
+#         # echo mat1.rowEchelonForm.showSteps
+#         # echo mat1.determinant
+#         # echo mat1.inverse
+#         # echo mat1.determinant
+#         echo mat1.inverseFromRowOperations.rowOperations.showSteps
+#         # echo mat1.inverse
+#         # echo mat1.reducedRowEchelonForm
+#         # echo mat1.solveUsingRowReduction
+#         # echo mat1.inverse
+#         # echo mat1.inverse * mat1
+#         # echo mat1.solutionExists
+#         # mat1.swapRows(1, 2)
+#         # echo mat1
+
+#         # let
+#         #     g = initFrac(3, 5)
+#         #     h = initFrac(1, 2)
+
+#         # echo lcm(g, h)
+
+#     except InverseOfSingularMatrix as e:
+#         echo e.msg
     
